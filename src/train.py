@@ -68,6 +68,7 @@ def hash_packets(filtered_pcap):
         ts = packet.timestamp
         packet.timestamp = 0
         packet.SC = 0
+        # del packet.fcs
 
         # Ignore TIM
         packet[5].len = 1
@@ -94,9 +95,10 @@ def hash_packets(filtered_pcap):
             hashes[str(packet.addr2)] = packet_hash
             print('0 - ' + str(packet.addr2) + ' - ' + str(index) + ' ts:' + str(ts))
         else:
-            if packet_hash not in hashes[str(packet.addr2)]:
-                hashes[str(packet.addr2)] = packet_hash
-                print('1 - ' + str(packet.addr2) + ' - ' + str(index) + ' ts:' + str(ts))
+            hashes[str(packet.addr2)] != packet_hash
+            print("Possible evil twin detected!")
+            print(str(packet.addr2) + ": " + packet_hash + " at index " + str(index))
+            # print('1 - ' + str(packet.addr2) + ' - ' + str(index) + ' ts:' + str(ts))
         index += 1
 
     return hashes

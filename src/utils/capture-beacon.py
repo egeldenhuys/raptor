@@ -1,8 +1,10 @@
-interface = "wlp0s29u1u3mon"
+interface = "wlp5s0mon"
 capture = True
 channel = 1
 captured_packet = None
 sniffer = None
+
+packs = []
 
 
 def hop_channel():
@@ -24,6 +26,7 @@ def handle_packet(packet):
     global sniffer
     if packet.type == 0 and packet.subtype == 8:
         captured_packet = packet
+        packs.append(packet)
         capture = False
         print("Captured a packet into 'captured_packet'. Call sniffer.stop() now")
 
