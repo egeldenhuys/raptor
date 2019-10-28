@@ -11,4 +11,4 @@
 #   capture.sh <interface> <essid>
 
 airmon-ng start $1
-airodump-ng $1 --write $2 --essid $2 --beacons --output-format pcap --write-interval 1
+airodump-ng $1 --write $2 --essid $2 --beacons -a --output-format pcap --write-interval 1

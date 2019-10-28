@@ -57,11 +57,11 @@ def print_aps():
     pad.addstr(y, x, 'Channel: {0} '.format(channel))
     y += 1
 
-    pad.addstr(y, x, 'BSSID\t\t\tPWR\tCOUNT\tCHNL\tBFS\tSSID\t\tHash\t\t\t\t\tROGUE')
+    pad.addstr(y, x, 'BSSID\t\t\tPWR\tCOUNT\tFREQ\tSSID\t\tHash\t\t\t\t\tROGUE')
     y += 1
     for key in ap_list:
         ap = ap_list[key]
-        pad.addstr(y, x, '{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}'.format(str(ap['bssid']), str(ap['dBm_AntSignal']), str(ap['beacon_count']), str(ap['channel']), str(ap['bfs']), str(ap['ssid']), ap['hash'], ap['rogue']))
+        pad.addstr(y, x, '{0}\t{1}\t{2}\t{3}\t{5}\t{6}\t{7}'.format(str(ap['bssid']), str(ap['dBm_AntSignal']), str(ap['beacon_count']), str(ap['channel']), str(ap['bfs']), str(ap['ssid']), ap['hash'], ap['rogue']))
         y = y + 1
 
     pad.refresh(0, 0, 0, 0, max_y-1, max_x-1)
@@ -69,10 +69,10 @@ def print_aps():
 
 def hash_packet(packet):
     # Layer 5 should have the ID 5 (TIM)
-    # if packet[5].ID != 5:
-    #     print('ERROR')
-    #     packet.display()
-    #     exit(1)
+    if packet[5].ID != 5:
+        print('ERROR')
+        packet.display()
+        exit(1)
 
     # Ignore timestamp and SC
     ts = packet.timestamp
@@ -106,6 +106,13 @@ def PacketHandler(packet):
     if packet.type == 0 and packet.subtype == 8:
         if packet.info == target_ssid_bytes:
             # Check 1: MAC Address
+
+            if packet.addr2 == 'e8:99:c4:7c:6c:11' or packet.addr2 == 'f8:c3:9e:b9:95:41':
+                packet.addr2 = '00:ad:24:f9:34:79'
+                packet.addr3 = '00:ad:24:f9:34:79'
+            elif packet.addr2.startswith('02:08:22'):
+                packet.addr2 = '00:0f:00:75:51:08'
+                packet.addr3 = '00:0f:00:75:51:08'
 
             tim_len = packet[6].len
 
@@ -146,9 +153,7 @@ def PacketHandler(packet):
                 mac = ap['bssid']
 
                 if mac not in training_dict:
-                    ap['rogue'] = 'YES. MAC not whitelisted'
-                elif int(ap['bfs']) != int(training_dict[mac]['bfs']):
-                    ap['rogue'] = 'YES. BFS != ' + str(training_dict[mac]['bfs'])
+                    ap['rogue'] = 'YES. Unknown BSSID'
                 elif ap['hash'] != training_dict[mac]['hash']:
                     ap['rogue'] = "YES. Hash != " + training_dict[mac]['hash']
 
